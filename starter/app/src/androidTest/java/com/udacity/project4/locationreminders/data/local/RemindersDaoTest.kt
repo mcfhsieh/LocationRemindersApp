@@ -1,6 +1,7 @@
 package com.udacity.project4.locationreminders.data.local
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.room.Query
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -24,6 +25,35 @@ import org.junit.Test
 //Unit test the DAO
 @SmallTest
 class RemindersDaoTest {
+
+   /* @get:Rule
+    var instantExecutorRule = InstantTaskExecutorRule()
+
+    @Before
+    fun setup(){
+
+    }
+
+    @After
+    fun destroy(){
+
+    }
+    @Query("SELECT * FROM reminders")
+    override suspend fun getReminders(): List<ReminderDTO> {
+
+    }
+
+    override suspend fun getReminderById(reminderId: String): ReminderDTO? {
+
+    }
+
+    override suspend fun saveReminder(reminder: ReminderDTO) {
+
+    }
+
+    override suspend fun deleteAllReminders() {
+
+    }*/
 
 //    TODO: Add testing implementation to the RemindersDao.kt
 
