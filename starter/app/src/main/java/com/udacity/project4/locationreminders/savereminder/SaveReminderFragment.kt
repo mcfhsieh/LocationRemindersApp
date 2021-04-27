@@ -99,8 +99,6 @@ class SaveReminderFragment : BaseFragment() {
             geoFencingClient.addGeofences(request, geofencePendingIntent)?.run {
                 addOnSuccessListener {
                     _viewModel.validateAndSaveReminder(reminder)
-                    _viewModel.navigationCommand.value =
-                        NavigationCommand.To(SaveReminderFragmentDirections.actionSaveReminderFragmentToReminderListFragment())
 
                     Toast.makeText(requireContext(), "Geofence Activated", Toast.LENGTH_SHORT).show()
 

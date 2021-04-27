@@ -16,10 +16,7 @@ import androidx.databinding.DataBindingUtil
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.*
 import com.google.android.material.snackbar.Snackbar
 import com.udacity.project4.R
@@ -46,6 +43,8 @@ class SelectLocationFragment : BaseFragment() {
         enableMyLocation()
         setMapOnLongClick(map)
         setPoiClick(map)
+        val initLatlng = LatLng(32.815581157757485, -96.77036646532642)
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(initLatlng, 15f))
 
     }
 
@@ -163,7 +162,7 @@ class SelectLocationFragment : BaseFragment() {
     private fun onLocationSelected() {
 
         _viewModel.navigationCommand.value =
-            NavigationCommand.To(SelectLocationFragmentDirections.actionSelectLocationFragmentToSaveReminderFragment())
+            NavigationCommand.Back
 
         //        TODO: When the user confirms on the selected location,
         //         send back the selected location details to the view model
