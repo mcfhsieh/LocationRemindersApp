@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/authenticationActivity">
+    app:startDestination="@id/reminderListFragment">
 
     <fragment
         android:id="@+id/reminderListFragment"
@@ -37,9 +37,4 @@
             app:destination="@id/saveReminderFragment"
             app:popUpToInclusive="false" />
         </fragment>
-    <activity
-        android:id="@+id/authenticationActivity"
-        android:name="com.udacity.project4.authentication.AuthenticationActivity"
-        android:label="activity_authentication"
-        tools:layout="@layout/activity_authentication" />
 </navigation>

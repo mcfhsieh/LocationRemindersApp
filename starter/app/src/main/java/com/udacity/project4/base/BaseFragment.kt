@@ -1,10 +1,13 @@
 package com.udacity.project4.base
 
+import android.content.Intent
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import com.google.android.gms.auth.api.Auth
 import com.google.android.material.snackbar.Snackbar
+import com.udacity.project4.authentication.AuthenticationActivity
 
 /**
  * Base Fragment to observe on the common LiveData objects
@@ -17,6 +20,16 @@ abstract class BaseFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
+        _viewModel.authenticationState.observe(this, Observer { authenticationState ->
+            when(authenticationState){
+                AuthenticationState.AUTHENTICATED  -> {
+                    println("user active")
+                }
+                AuthenticationState.UNAUTHENTICATED -> {
+                   loginUser()
+                }
+            }
+        })
         _viewModel.showErrorMessage.observe(this, Observer {
             Toast.makeText(activity, it, Toast.LENGTH_LONG).show()
         })
@@ -40,5 +53,10 @@ abstract class BaseFragment : Fragment() {
                 )
             }
         })
+    }
+
+    private fun loginUser() {
+        val intent = Intent(requireContext(), AuthenticationActivity::class.java)
+        startActivity(intent)
     }
 }

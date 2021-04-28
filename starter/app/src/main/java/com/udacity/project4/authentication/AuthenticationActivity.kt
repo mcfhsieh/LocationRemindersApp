@@ -6,9 +6,11 @@ import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.LiveData
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.udacity.project4.R
 import com.udacity.project4.databinding.ActivityAuthenticationBinding
 import com.udacity.project4.locationreminders.RemindersActivity
@@ -20,7 +22,8 @@ import com.udacity.project4.locationreminders.RemindersActivity
 class AuthenticationActivity : AppCompatActivity() {
 
 
-    lateinit var binding:ActivityAuthenticationBinding
+    lateinit var binding: ActivityAuthenticationBinding
+
     companion object {
         const val SIGN_IN_REQUEST_CODE = 1010
         const val TAG = "LoginFragment"
@@ -49,14 +52,16 @@ class AuthenticationActivity : AppCompatActivity() {
         )
 
         startActivityForResult(
-            AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(providers).setIsSmartLockEnabled(false)
+            AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(providers)
+                .setIsSmartLockEnabled(false)
                 .build(),
             SIGN_IN_REQUEST_CODE
         )
     }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == SIGN_IN_REQUEST_CODE){
+        if (requestCode == SIGN_IN_REQUEST_CODE) {
             val response = IdpResponse.fromResultIntent(data)
             if (resultCode == Activity.RESULT_OK) {
                 // User successfully signed in
@@ -75,9 +80,27 @@ class AuthenticationActivity : AppCompatActivity() {
             }
         }
     }
+
     private fun goToReminders() {
         val intent = Intent(this, RemindersActivity::class.java)
         startActivity(intent)
         finish()
+    }
+}
+
+class FirebaseUserLiveData : LiveData<FirebaseUser?>() {
+    private val firebaseAuth = FirebaseAuth.getInstance()
+
+    private val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+        value = firebaseAuth.currentUser
+
+    }
+
+    override fun onActive() {
+        firebaseAuth.addAuthStateListener(authStateListener)
+    }
+
+    override fun onInactive() {
+        firebaseAuth.removeAuthStateListener(authStateListener)
     }
 }
