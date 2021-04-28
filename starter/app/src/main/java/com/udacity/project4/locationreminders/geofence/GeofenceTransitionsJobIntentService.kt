@@ -21,7 +21,6 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.IO + coroutineJob
     private val remindersLocalRepository: RemindersLocalRepository by inject()
-    private val dao = RemindersDao()
 
     companion object {
         private const val JOB_ID = 573
