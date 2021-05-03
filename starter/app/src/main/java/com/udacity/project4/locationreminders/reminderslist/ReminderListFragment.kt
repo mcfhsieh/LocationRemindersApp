@@ -67,13 +67,14 @@ class ReminderListFragment : BaseFragment() {
     }
 
     private fun setupRecyclerView() {
-        val adapter = RemindersListAdapter {
-
+        val adapter = RemindersListAdapter { reminder ->
+           startActivity( ReminderDescriptionActivity.newIntent(requireContext(), reminder))
         }
 
 //        setup the recycler view using the extension function
         binding.reminderssRecyclerView.setup(adapter)
     }
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {

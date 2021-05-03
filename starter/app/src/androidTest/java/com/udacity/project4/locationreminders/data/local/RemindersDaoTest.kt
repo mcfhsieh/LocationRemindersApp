@@ -25,36 +25,55 @@ import org.junit.Test
 //Unit test the DAO
 @SmallTest
 class RemindersDaoTest {
+    private lateinit var database: RemindersDatabase
+    private lateinit var reminder: ReminderDTO
 
-   /* @get:Rule
+    @get:Rule
     var instantExecutorRule = InstantTaskExecutorRule()
 
     @Before
-    fun setup(){
+    fun setup() {
+        database = Room.inMemoryDatabaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            RemindersDatabase::class.java
+        ).build()
+        reminder = ReminderDTO("title", "description", "location", 1.0, 2.0, "id")
 
     }
 
     @After
-    fun destroy(){
-
-    }
-    @Query("SELECT * FROM reminders")
-    override suspend fun getReminders(): List<ReminderDTO> {
-
+    fun destroy() {
+        database.close()
     }
 
-    override suspend fun getReminderById(reminderId: String): ReminderDTO? {
+    @Test
+    fun getReminders_loadRemindersFromDB() = runBlockingTest {
 
+        database.reminderDao().saveReminder(reminder)
+        val remindersFromDB = database.reminderDao().getReminders()
+        assertThat(remindersFromDB, notNullValue())
+        assertThat(remindersFromDB[0].title, `is`("title"))
     }
 
-    override suspend fun saveReminder(reminder: ReminderDTO) {
+    @Test
+    fun getReminderById_queryReminder() = runBlockingTest {
+        database.reminderDao().saveReminder(reminder)
 
+        val queryreminder = database.reminderDao().getReminderById("id")
+
+        assertThat(queryreminder, `is`(reminder))
     }
 
-    override suspend fun deleteAllReminders() {
+    @Test
+    fun deleteAllReminders() = runBlockingTest {
+        database.reminderDao().saveReminder(reminder)
+        database.reminderDao().deleteAllReminders()
 
-    }*/
+        val reminders = database.reminderDao().getReminders()
 
-//    TODO: Add testing implementation to the RemindersDao.kt
+        assertThat(reminders, `is`(emptyList()))
+    }
+
+//    TODO: Add testing implementation to the RemindersDao.kt*/
 
 }

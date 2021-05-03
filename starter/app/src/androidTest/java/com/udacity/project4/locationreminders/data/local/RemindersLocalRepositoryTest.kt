@@ -10,6 +10,7 @@ import com.udacity.project4.locationreminders.data.dto.Result
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runBlockingTest
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.MatcherAssert.assertThat
@@ -25,12 +26,9 @@ import org.junit.runner.RunWith
 //Medium Test to test the repository
 @MediumTest
 class RemindersLocalRepositoryTest {
-    private val reminder1 = ReminderDTO("1", "1", "1", 50.0, 40.0)
+    private val reminder1 = ReminderDTO("1", "1", "1", 50.0, 40.0, "id")
     private val reminder2 = ReminderDTO("2", "2", "2", 50.0, 40.0)
     private val reminder3 = ReminderDTO("3", "3", "3", 50.0, 40.0)
-    private val reminders = mutableListOf(reminder1, reminder2, reminder3)
-    private val remindersLocal = mutableListOf(reminder3)
-    private val fakeDBDataSource = FakeDataSource(remindersLocal)
     private lateinit var repo: RemindersLocalRepository
     private lateinit var database: RemindersDatabase
 
@@ -62,6 +60,29 @@ class RemindersLocalRepositoryTest {
         assertThat(allReminders.data[0], IsEqual(reminder1))
         val localReminder2 = repo.getReminder(reminder2.id) as Result.Success
         assertThat(localReminder2.data, IsEqual(reminder2))
+    }
+
+    @Test
+    fun getReminder_queryReminder() = runBlocking{
+        repo.saveReminder(reminder1)
+
+        val queryReminder = repo.getReminder(reminder1.id) as Result.Success
+
+        assertThat(queryReminder.data, IsEqual(reminder1))
+    }
+
+    @Test
+    fun deleteAllReminders_deleteAllRemindersInDB() = runBlocking{
+        repo.saveReminder(reminder1)
+        repo.saveReminder(reminder2)
+        repo.saveReminder(reminder3)
+        repo.deleteAllReminders()
+
+        val emptyReminders= repo.getReminders() as Result.Success
+
+        assertThat(emptyReminders.data, `is`(emptyList()))
+
+
     }
 
 //    TODO: Add testing implementation to the RemindersLocalRepository.kt
