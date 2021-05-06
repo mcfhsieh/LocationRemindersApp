@@ -5,6 +5,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
+import com.udacity.project4.MainCoroutineRule
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
 import kotlinx.coroutines.Dispatchers
@@ -34,6 +35,8 @@ class RemindersLocalRepositoryTest {
 
     @get:Rule
     var instantExecutorRule = InstantTaskExecutorRule()
+    @get:Rule
+    var mainCoroutineRule = MainCoroutineRule()
 
     @Before
     fun buildIt() {
@@ -52,7 +55,7 @@ class RemindersLocalRepositoryTest {
     }
 
     @Test
-    fun getReminders_getAllRemindersFromDB() = runBlocking{
+    fun getReminders_getAllRemindersFromDB() = mainCoroutineRule.runBlockingTest{
         repo.saveReminder(reminder1)
         repo.saveReminder(reminder2)
         repo.saveReminder(reminder3)
@@ -63,7 +66,7 @@ class RemindersLocalRepositoryTest {
     }
 
     @Test
-    fun getReminder_queryReminder() = runBlocking{
+    fun getReminder_queryReminder() = mainCoroutineRule.runBlockingTest{
         repo.saveReminder(reminder1)
 
         val queryReminder = repo.getReminder(reminder1.id) as Result.Success
@@ -72,7 +75,7 @@ class RemindersLocalRepositoryTest {
     }
 
     @Test
-    fun deleteAllReminders_deleteAllRemindersInDB() = runBlocking{
+    fun deleteAllReminders_deleteAllRemindersInDB() = mainCoroutineRule.runBlockingTest{
         repo.saveReminder(reminder1)
         repo.saveReminder(reminder2)
         repo.saveReminder(reminder3)

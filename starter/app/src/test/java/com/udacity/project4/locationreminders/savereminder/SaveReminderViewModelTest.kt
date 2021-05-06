@@ -1,22 +1,19 @@
 package com.udacity.project4.locationreminders.savereminder
 
-import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.locationreminders.MainCoroutineRule
 import com.udacity.project4.locationreminders.getOrAwaitValue
-import com.udacity.project4.locationreminders.reminderslist.FakeDataSource
+import com.udacity.project4.locationreminders.data.FakeDataSource
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import org.junit.Before
+import org.hamcrest.CoreMatchers.*
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.hamcrest.CoreMatchers.`is`
-import org.hamcrest.CoreMatchers.instanceOf
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.core.IsEqual
 
 @ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
@@ -41,10 +38,16 @@ class SaveReminderViewModelTest {
             1.00, 2.00, "id"
         )
         saveReminderViewModel.saveReminder(reminder)
+        val navCommand = saveReminderViewModel.navigationCommand.getOrAwaitValue()
+
         assertThat(saveReminderViewModel.showLoading.getOrAwaitValue(), `is`(false))
+        assertThat(navCommand to NavigationCommand.Back, (not(nullValue())))
+        assertThat(saveReminderViewModel.showToast.getOrAwaitValue(), `is`("Reminder Saved !"))
     }
 
-    //TODO: provide testing to the SaveReminderView and its live data objects
+
+
+    //DONE: provide testing to the SaveReminderView and its live data objects
 
 
 }

@@ -3,6 +3,8 @@ package com.udacity.project4.locationreminders.reminderslist
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.udacity.project4.locationreminders.MainCoroutineRule
+import com.udacity.project4.locationreminders.data.FakeDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.getOrAwaitValue
 import kotlinx.coroutines.Dispatchers
@@ -11,6 +13,7 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.setMain
+import org.hamcrest.CoreMatchers
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -23,47 +26,44 @@ import org.hamcrest.Matchers.notNullValue
 @RunWith(AndroidJUnit4::class)
 @ExperimentalCoroutinesApi
 class RemindersListViewModelTest {
-    lateinit var dataSource: FakeDataSource
-    lateinit var viewModel: RemindersListViewModel
-    lateinit var reminder: ReminderDTO
-    private val dispatcher = TestCoroutineDispatcher()
+    private lateinit var dataSource: FakeDataSource
+    private lateinit var viewModel: RemindersListViewModel
+    private lateinit var reminder: ReminderDTO
 
     @get:Rule
     var instantExecutorRule = InstantTaskExecutorRule()
 
+    @get:Rule
+    var mainCoroutineRule = MainCoroutineRule()
 
     @Before
     fun setUp() {
         dataSource = FakeDataSource()
-        val viewModel =
+        viewModel =
             RemindersListViewModel(ApplicationProvider.getApplicationContext(), dataSource)
-        val reminder = ReminderDTO(
+        reminder = ReminderDTO(
             "title",
             "description",
             "location",
             20.0,
             10.0
         )
-        Dispatchers.setMain(dispatcher)
-
-    }
-
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
-        dispatcher.cleanupTestCoroutines()
+        mainCoroutineRule.runBlockingTest {
+            dataSource.saveReminder(reminder)
+        }
     }
 
     @Test
-    fun loadReminders_() {
-        runBlockingTest {
-            dataSource.saveReminder(reminder)
-            viewModel.loadReminders()
+    fun loadReminders_getsRemindersForDisplay() {
 
-            val remindersList = viewModel.remindersList.getOrAwaitValue()[0]
+      viewModel.loadReminders()
 
-            assertThat(remindersList, `is`(notNullValue()))
-        }
+        val remindersList = viewModel.remindersList.getOrAwaitValue()[0]
+
+        assertThat(remindersList, `is`(notNullValue()))
+        assertThat(viewModel.showLoading.getOrAwaitValue(), CoreMatchers.`is`(false))
+        assertThat(viewModel.showNoData.getOrAwaitValue(), `is`(false))
+
     }
 
     //TODO: provide testing to the RemindersListViewModel and its live data objects
