@@ -1,9 +1,14 @@
 package com.udacity.project4
 
 import android.app.Application
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.ViewActions.*
+import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import com.udacity.project4.locationreminders.RemindersActivity
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
@@ -11,6 +16,7 @@ import com.udacity.project4.locationreminders.reminderslist.RemindersListViewMod
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
@@ -63,6 +69,19 @@ class RemindersActivityTest :
         runBlocking {
             repository.deleteAllReminders()
         }
+    }
+
+    @Test
+    fun createReminder(){
+        val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
+        onView(withId(R.id.addReminderFAB)).perform(click())
+        onView(withId(R.id.reminderTitle)).perform(replaceText("new title"))
+        onView(withId(R.id.reminderDescription)).perform(replaceText("new description"))
+        onView(withId(R.id.selectLocation)).perform(click())
+        onView(withId(R.id.map_fragment)).perform(longClick())
+        onView(withId(R.id.save_location)).perform(click())
+        onView(withId(R.id.saveReminder)).perform(click())
+        activityScenario.close()
     }
 
 

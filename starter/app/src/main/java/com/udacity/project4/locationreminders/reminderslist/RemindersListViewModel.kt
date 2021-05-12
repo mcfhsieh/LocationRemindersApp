@@ -29,7 +29,6 @@ class RemindersListViewModel(
         viewModelScope.launch {
             //interacting with the dataSource has to be through a coroutine
             val result = dataSource.getReminders()
-            showLoading.postValue(false)
             when (result) {
                 is Result.Success<*> -> {
                     val dataList = ArrayList<ReminderDataItem>()
@@ -44,7 +43,8 @@ class RemindersListViewModel(
                             reminder.id
                         )
                     })
-                    remindersList.value = dataList
+                    showLoading.postValue(false)
+                    remindersList.postValue(dataList)
                 }
                 is Result.Error ->
                     showSnackBar.value = result.message
@@ -59,7 +59,7 @@ class RemindersListViewModel(
      * Inform the user that there's not any data if the remindersList is empty
      */
     private fun invalidateShowNoData() {
-        showNoData.value = remindersList.value == null || remindersList.value!!.isEmpty()
+        showNoData.postValue(remindersList.value == null || remindersList.value!!.isEmpty())
     }
 
 }

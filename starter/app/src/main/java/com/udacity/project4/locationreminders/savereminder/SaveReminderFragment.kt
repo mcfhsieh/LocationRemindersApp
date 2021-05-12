@@ -78,7 +78,10 @@ class SaveReminderFragment : BaseFragment() {
                 val newReminder = ReminderDataItem(
                     title, description.value, location, latitude, longitude
                 )
-                addGeofence(newReminder)
+                if (_viewModel.validateEnteredData(newReminder)){
+                    _viewModel.validateAndSaveReminder(newReminder)
+                    addGeofence(newReminder)
+                }
 
             } else Toast.makeText(requireContext(), "Missing coordinates", Toast.LENGTH_SHORT).show()
         }
@@ -101,10 +104,7 @@ class SaveReminderFragment : BaseFragment() {
             == PackageManager.PERMISSION_GRANTED) {
             geoFencingClient.addGeofences(request, geofencePendingIntent)?.run {
                 addOnSuccessListener {
-                    _viewModel.validateAndSaveReminder(reminder)
-
                     Toast.makeText(requireContext(), "Geofence Activated", Toast.LENGTH_SHORT).show()
-
                 }
                 addOnFailureListener {
                     Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
