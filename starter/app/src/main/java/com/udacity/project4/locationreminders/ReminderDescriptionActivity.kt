@@ -19,12 +19,14 @@ import com.udacity.project4.locationreminders.savereminder.SaveReminderFragment
 /**
  * Activity that displays the reminder details after the user clicks on the notification
  */
-class ReminderDescriptionActivity : AppCompatActivity(), OnMapReadyCallback{
+class ReminderDescriptionActivity : AppCompatActivity(), OnMapReadyCallback {
 
-    private lateinit var map:GoogleMap
-    private lateinit var reminder:ReminderDataItem
+    private lateinit var map: GoogleMap
+    private lateinit var reminder: ReminderDataItem
+    private lateinit var binding: ActivityReminderDescriptionBinding
 
     companion object {
+
         private const val EXTRA_ReminderDataItem = "EXTRA_ReminderDataItem"
 
         //        receive the reminder object after the user clicks on the notification
@@ -35,7 +37,6 @@ class ReminderDescriptionActivity : AppCompatActivity(), OnMapReadyCallback{
         }
     }
 
-    private lateinit var binding: ActivityReminderDescriptionBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(
@@ -44,11 +45,20 @@ class ReminderDescriptionActivity : AppCompatActivity(), OnMapReadyCallback{
         )
         reminder = intent.getSerializableExtra(EXTRA_ReminderDataItem) as ReminderDataItem
         binding.reminderDataItem = reminder
-//        TODO: Add the implementation of the reminder details
+//        DONE: Add the implementation of the reminder details
 
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.reminder_detail_map) as SupportMapFragment
+        val mapFragment =
+            supportFragmentManager.findFragmentById(R.id.reminder_detail_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
         binding.root
+
+    }
+
+    override fun onBackPressed() {
+        if (intent.action == "notification") {
+            val backToStartIntent = Intent(this, RemindersActivity::class.java)
+            startActivity(backToStartIntent)
+        }else super.onBackPressed()
 
     }
 
@@ -66,8 +76,8 @@ class ReminderDescriptionActivity : AppCompatActivity(), OnMapReadyCallback{
 //        )
         val locationMarker = map.addMarker(
             MarkerOptions()
-            .position(latLng)
-            .title(reminder.location)
+                .position(latLng)
+                .title(reminder.location)
         )
         locationMarker.showInfoWindow()
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))

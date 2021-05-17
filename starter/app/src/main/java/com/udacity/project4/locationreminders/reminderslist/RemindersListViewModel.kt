@@ -1,9 +1,15 @@
 package com.udacity.project4.locationreminders.reminderslist
 
 import android.app.Application
+import android.content.Intent
+import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
+import com.udacity.project4.authentication.AuthenticationActivity
+import com.udacity.project4.authentication.FirebaseUserLiveData
 //import com.udacity.project4.authentication.FirebaseUserLiveData
 import com.udacity.project4.base.AuthenticationState
 import com.udacity.project4.base.BaseViewModel
@@ -18,6 +24,7 @@ class RemindersListViewModel(
 ) : BaseViewModel(app) {
     // list that holds the reminder data to be displayed on the UI
     val remindersList = MutableLiveData<List<ReminderDataItem>>()
+
 
 
     /**
@@ -43,8 +50,8 @@ class RemindersListViewModel(
                             reminder.id
                         )
                     })
-                    showLoading.postValue(false)
-                    remindersList.postValue(dataList)
+                    showLoading.value = false
+                    remindersList.value = dataList
                 }
                 is Result.Error ->
                     showSnackBar.value = result.message
@@ -59,7 +66,7 @@ class RemindersListViewModel(
      * Inform the user that there's not any data if the remindersList is empty
      */
     private fun invalidateShowNoData() {
-        showNoData.postValue(remindersList.value == null || remindersList.value!!.isEmpty())
+        showNoData.value = (remindersList.value == null || remindersList.value!!.isEmpty())
     }
 
 }

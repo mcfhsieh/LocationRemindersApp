@@ -104,10 +104,10 @@ class SaveReminderFragment : BaseFragment() {
             == PackageManager.PERMISSION_GRANTED) {
             geoFencingClient.addGeofences(request, geofencePendingIntent)?.run {
                 addOnSuccessListener {
-                    Toast.makeText(requireContext(), "Geofence Activated", Toast.LENGTH_SHORT).show()
+//                    Toast.makeText(requireContext(), "Geofence Activated", Toast.LENGTH_SHORT).show()
                 }
                 addOnFailureListener {
-                    Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
+//                    Toast.makeText(requireContext(), it.message, Toast.LENGTH_SHORT).show()
                 }
             }
         }

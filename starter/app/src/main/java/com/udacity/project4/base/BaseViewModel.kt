@@ -26,11 +26,7 @@ abstract class BaseViewModel(app: Application) : AndroidViewModel(app) {
     val showToast: SingleLiveEvent<String> = SingleLiveEvent()
     val showLoading: SingleLiveEvent<Boolean> = SingleLiveEvent()
     val showNoData: MutableLiveData<Boolean> = MutableLiveData()
-//    val userStatus = FirebaseUserLiveData()
-//    val authenticationState = FirebaseUserLiveData().map { user ->
-//        if (user != null){
-//            AuthenticationState.AUTHENTICATED
-//        }else AuthenticationState.UNAUTHENTICATED
-//    }
+    val skipAuthentication: SingleLiveEvent<Boolean> = SingleLiveEvent()
+
 
 }

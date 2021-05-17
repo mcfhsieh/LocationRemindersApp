@@ -7,7 +7,9 @@ import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.test.annotation.UiThreadTest
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
@@ -15,12 +17,19 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
 import com.udacity.project4.MainCoroutineRule
 import com.udacity.project4.R
+import com.udacity.project4.authentication.AuthenticationActivity
 import com.udacity.project4.base.AuthenticationState
+import com.udacity.project4.base.BaseViewModel
+import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.local.FakeReminderSource
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
+import com.udacity.project4.util.DataBindingIdlingResource
+import com.udacity.project4.util.monitorFragment
+import com.udacity.project4.utils.EspressoIdlingResource
+import com.udacity.project4.utils.wrapEspressoIdlingResource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runBlockingTest
@@ -43,6 +52,8 @@ import kotlin.concurrent.thread
 class ReminderListFragmentTest {
     private lateinit var application: Application
     private lateinit var dataSource: FakeReminderSource
+    private lateinit var _viewModel:RemindersListViewModel
+
 
     @get:Rule
     var mainCoroutineRule = MainCoroutineRule()
@@ -50,8 +61,11 @@ class ReminderListFragmentTest {
     @Before
     fun init() {
         dataSource = FakeReminderSource()
+
         stopKoin()
         application = ApplicationProvider.getApplicationContext()
+        _viewModel = RemindersListViewModel(application, dataSource)
+        _viewModel.skipAuthentication.postValue(true)
         val myModule = module {
             viewModel{
                 RemindersListViewModel(application, dataSource)
@@ -62,7 +76,6 @@ class ReminderListFragmentTest {
         startKoin {
             modules(listOf(myModule))
         }
-
     }
 
     @After
@@ -70,15 +83,11 @@ class ReminderListFragmentTest {
         stopKoin()
     }
 
-
     @Test
     fun erroMesageTest_catchErrorMsg()= mainCoroutineRule.runBlockingTest {
         dataSource.saveReminder(ReminderDTO("title", "des", "location", 1.00, 2.00, "id" ))
         dataSource.deleteAllReminders()
         val scenario = launchFragmentInContainer<ReminderListFragment>(Bundle(), R.style.AppTheme)
-        delay(3000)
-
-
         onView(withId(R.id.noDataTextView)).check(matches(isDisplayed()))
     }
 
@@ -87,13 +96,12 @@ class ReminderListFragmentTest {
         val reminder = ReminderDTO("title", "des", "location", 1.00, 2.00, "id" )
         dataSource.saveReminder(reminder)
         launchFragmentInContainer<ReminderListFragment>(Bundle(), R.style.AppTheme)
-        delay(5000)
         onView(withId(R.id.reminderssRecyclerView)).check(matches(isDisplayed()))
         onView(withText(reminder.title)).check(matches(isDisplayed()))
     }
 
     @Test
-    fun navigationTest_RemindersList_to_SaveReminder() {
+    fun navigationTest_RemindersList_to_SaveReminder() = mainCoroutineRule.runBlockingTest{
 
         val scenario = launchFragmentInContainer<ReminderListFragment>(Bundle(), R.style.AppTheme)
         val navController = mock(NavController::class.java)
@@ -103,9 +111,8 @@ class ReminderListFragmentTest {
         }
 
         onView(withId(R.id.addReminderFAB)).perform(click())
-        verify(navController).navigate(
-            ReminderListFragmentDirections.toSaveReminder()
-        )
+        verify(navController).navigate(ReminderListFragmentDirections.toSaveReminder())
+
     }
 
 

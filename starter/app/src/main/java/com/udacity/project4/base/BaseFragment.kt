@@ -9,8 +9,10 @@ import androidx.lifecycle.map
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.auth.api.Auth
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
 import com.udacity.project4.authentication.AuthenticationActivity
 import com.udacity.project4.authentication.FirebaseUserLiveData
+import com.google.android.gms.tasks.OnCompleteListener as OnCompleteListener1
 
 /**
  * Base Fragment to observe on the common LiveData objects
@@ -24,6 +26,13 @@ abstract class BaseFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
+//        FirebaseAuth.getInstance().signInWithEmailAndPassword("littlemensinmx@yahoo.com", "Rubish")
+//            .addOnCompleteListener {
+//                if (it.isSuccessful){
+//                    checkAuthenticationState()
+//                }else  checkAuthenticationState()
+//
+//            }
 
         checkAuthenticationState()
 
@@ -33,7 +42,7 @@ abstract class BaseFragment : Fragment() {
                     println("user active")
                 }
                 AuthenticationState.UNAUTHENTICATED -> {
-//                    loginUser()
+                    loginUser()
                 }
             }
         })
@@ -65,6 +74,7 @@ abstract class BaseFragment : Fragment() {
     }
 
     private fun checkAuthenticationState() {
+
         authenticationState = FirebaseUserLiveData().map { user ->
             if (user != null) {
                 AuthenticationState.AUTHENTICATED
