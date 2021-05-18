@@ -52,7 +52,6 @@ class ReminderListFragment : BaseFragment() {
         binding.lifecycleOwner = this
         setupRecyclerView()
         binding.addReminderFAB.setOnClickListener {
-//            NavigationCommand.To(ReminderListFragmentDirections.toSaveReminder())
             navigateToAddReminder()
         }
     }
