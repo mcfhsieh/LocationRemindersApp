@@ -1,12 +1,14 @@
 package com.udacity.project4.locationreminders
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import androidx.navigation.fragment.NavHostFragment
@@ -40,4 +42,10 @@ class RemindersActivity : AppCompatActivity() {
         }
         return super.onOptionsItemSelected(item)
     }
+
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        super.onActivityResult(requestCode, resultCode, data)
+//        val fragment = supportFragmentManager.findFragmentById(R.id.saveReminderFragment)
+//        fragment?.onActivityResult(requestCode,resultCode, data)
+//    }
 }

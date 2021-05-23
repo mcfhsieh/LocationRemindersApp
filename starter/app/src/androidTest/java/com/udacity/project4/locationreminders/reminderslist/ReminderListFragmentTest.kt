@@ -5,11 +5,8 @@ import android.os.Bundle
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
-import androidx.test.annotation.UiThreadTest
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
@@ -17,19 +14,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
 import com.udacity.project4.MainCoroutineRule
 import com.udacity.project4.R
-import com.udacity.project4.authentication.AuthenticationActivity
-import com.udacity.project4.base.AuthenticationState
-import com.udacity.project4.base.BaseViewModel
-import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.local.FakeReminderSource
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
-import com.udacity.project4.util.DataBindingIdlingResource
-import com.udacity.project4.util.monitorFragment
-import com.udacity.project4.utils.EspressoIdlingResource
-import com.udacity.project4.utils.wrapEspressoIdlingResource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runBlockingTest
@@ -44,7 +33,6 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import kotlin.concurrent.thread
 
 @RunWith(AndroidJUnit4::class)
 @ExperimentalCoroutinesApi
@@ -61,7 +49,6 @@ class ReminderListFragmentTest {
     @Before
     fun init() {
         dataSource = FakeReminderSource()
-
         stopKoin()
         application = ApplicationProvider.getApplicationContext()
         _viewModel = RemindersListViewModel(application, dataSource)
@@ -101,7 +88,7 @@ class ReminderListFragmentTest {
     }
 
     @Test
-    fun navigationTest_RemindersList_to_SaveReminder() = mainCoroutineRule.runBlockingTest{
+    fun navigationTest_RemindersList_to_SaveReminder(){
 
         val scenario = launchFragmentInContainer<ReminderListFragment>(Bundle(), R.style.AppTheme)
         val navController = mock(NavController::class.java)
@@ -109,11 +96,13 @@ class ReminderListFragmentTest {
         scenario.onFragment {
             Navigation.setViewNavController(it.view!!, navController)
         }
-
-        onView(withId(R.id.addReminderFAB)).perform(click())
-        verify(navController).navigate(ReminderListFragmentDirections.toSaveReminder())
+        navController.navigate(ReminderListFragmentDirections.toSaveReminder())
+        verify(navController).navigate(
+            ReminderListFragmentDirections.toSaveReminder()
+        )
 
     }
+
 
 
 

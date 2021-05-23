@@ -7,21 +7,17 @@ import com.udacity.project4.locationreminders.MainCoroutineRule
 import com.udacity.project4.locationreminders.data.FakeDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.getOrAwaitValue
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runBlockingTest
-import kotlinx.coroutines.test.setMain
 import org.hamcrest.CoreMatchers
-import org.junit.After
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.`is`
+import org.hamcrest.Matchers.notNullValue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.`is`
-import org.hamcrest.Matchers.notNullValue
+import org.koin.core.context.stopKoin
 
 @RunWith(AndroidJUnit4::class)
 @ExperimentalCoroutinesApi
@@ -56,14 +52,23 @@ class RemindersListViewModelTest {
     @Test
     fun loadReminders_getsRemindersForDisplay() {
 
-      viewModel.loadReminders()
+        viewModel.loadReminders()
 
         val remindersList = viewModel.remindersList.getOrAwaitValue()[0]
 
         assertThat(remindersList, `is`(notNullValue()))
-        assertThat(viewModel.showLoading.getOrAwaitValue(), CoreMatchers.`is`(false))
+        assertThat(viewModel.showLoading.getOrAwaitValue(), `is`(false))
         assertThat(viewModel.showNoData.getOrAwaitValue(), `is`(false))
+        stopKoin()
+    }
 
+    @Test
+    fun loadReminders_testErrorHandling() {
+        dataSource.activateErrorHandling(true)
+        viewModel.loadReminders()
+        assertThat(viewModel.showSnackBar.getOrAwaitValue(), `is`("Reminder not found"))
+        assertThat(viewModel.showNoData.getOrAwaitValue(), `is`(true))
+        stopKoin()
     }
 
     //TODO: provide testing to the RemindersListViewModel and its live data objects

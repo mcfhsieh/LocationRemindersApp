@@ -11,6 +11,7 @@ import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.hamcrest.CoreMatchers.*
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,18 +21,22 @@ import org.junit.runner.RunWith
 class SaveReminderViewModelTest {
 
     private lateinit var dataSource: FakeDataSource
+    private lateinit var saveReminderViewModel:SaveReminderViewModel
 
     @get:Rule
     var mainCoroutineRule = MainCoroutineRule()
 
     @get:Rule
     var instantTaskExecutorRule = InstantTaskExecutorRule()
+    @Before
+    fun init(){
+        saveReminderViewModel = SaveReminderViewModel(ApplicationProvider.getApplicationContext(), dataSource)
+        dataSource = FakeDataSource()
+
+    }
 
     @Test
     fun validateAndSaveReminder() {
-        dataSource = FakeDataSource()
-        val saveReminderViewModel =
-            SaveReminderViewModel(ApplicationProvider.getApplicationContext(), dataSource)
         val reminder = ReminderDataItem(
             "title",
             "description", "location",
@@ -44,6 +49,7 @@ class SaveReminderViewModelTest {
         assertThat(navCommand to NavigationCommand.Back, (not(nullValue())))
         assertThat(saveReminderViewModel.showToast.getOrAwaitValue(), `is`("Reminder Saved !"))
     }
+
 
 
 

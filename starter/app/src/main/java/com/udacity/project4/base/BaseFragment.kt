@@ -12,6 +12,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.FirebaseAuth
 import com.udacity.project4.authentication.AuthenticationActivity
 import com.udacity.project4.authentication.FirebaseUserLiveData
+import com.udacity.project4.utils.wrapEspressoIdlingResource
 import com.google.android.gms.tasks.OnCompleteListener as OnCompleteListener1
 
 /**
@@ -26,13 +27,6 @@ abstract class BaseFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-//        FirebaseAuth.getInstance().signInWithEmailAndPassword("littlemensinmx@yahoo.com", "Rubish")
-//            .addOnCompleteListener {
-//                if (it.isSuccessful){
-//                    checkAuthenticationState()
-//                }else  checkAuthenticationState()
-//
-//            }
 
         checkAuthenticationState()
 
@@ -52,7 +46,9 @@ abstract class BaseFragment : Fragment() {
         })
 
         _viewModel.showToast.observe(this, Observer {
-            Toast.makeText(activity, it, Toast.LENGTH_LONG).show()
+            wrapEspressoIdlingResource {
+                Toast.makeText(activity, it, Toast.LENGTH_LONG).show()
+            }
         })
         _viewModel.showSnackBar.observe(this, Observer {
             Snackbar.make(this.view!!, it, Snackbar.LENGTH_LONG).show()

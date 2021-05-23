@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.content.res.Resources
-import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -34,33 +33,88 @@ class SelectLocationFragment : BaseFragment() {
     //Use Koin to get the view model of the SaveReminder
     override val _viewModel: SaveReminderViewModel by inject()
     private lateinit var binding: FragmentSelectLocationBinding
-    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     lateinit var map: GoogleMap
     private val LOCATION_PERMISSION_REQUEST_CODE = 1
     private val TAG = "Map style"
-    private var lastKnownLocation: Location? = null
+    private var locationPermissionGranted: Boolean = false
+    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
+        binding =
+            DataBindingUtil.inflate(inflater, R.layout.fragment_select_location, container, false)
+        binding.viewModel = _viewModel
+        binding.lifecycleOwner = this
+        setHasOptionsMenu(true)
+        setDisplayHomeAsUpEnabled(true)
+
+//        DONE: add the map setup implementation
+//        TODO: zoom to the user location after taking his permission
+//        TODO: add style to the map
+//        TODO: put a marker to location that the user selected
+
+
+//        TODO: call this function after the user confirms on the selected location
+
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val mapFragment =
+            childFragmentManager.findFragmentById(R.id.map_fragment) as SupportMapFragment?
+        mapFragment?.getMapAsync(callback)
+        fusedLocationProviderClient =
+            LocationServices.getFusedLocationProviderClient(requireActivity())
+
+    }
 
     private val callback = OnMapReadyCallback { googleMap ->
         map = googleMap
         setMapStyle(map)
         enableMyLocation()
+        getDeviceLocation()
         setMapOnLongClick(map)
         setPoiClick(map)
-        getDeviceLocation()
+        val initLatlng = LatLng(32.815581157757485, -96.77036646532642)
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(initLatlng, 15f))
+
+    }
+
+    private fun enableMyLocation() {
+        if (!::map.isInitialized) return
+        locationPermissionGranted = true
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+            == PackageManager.PERMISSION_GRANTED
+        ) {
+            map.isMyLocationEnabled = true
+//            Toast.makeText(requireContext(), "Select a point of interest", Toast.LENGTH_LONG).show()
+        } else {
+            // Permission to access the location is missing. Show rationale and request permission
+            Toast.makeText(requireContext(), "Permission needed to find you", Toast.LENGTH_SHORT)
+                .show()
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                requestPermissions(
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                    ), LOCATION_PERMISSION_REQUEST_CODE
+                )
+            }
+        }
     }
 
     private fun getDeviceLocation() {
         try {
-            if (ContextCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                )
-                == PackageManager.PERMISSION_GRANTED
-            ) {
+            if (locationPermissionGranted) {
                 val locationResult = fusedLocationProviderClient.lastLocation
                 locationResult.addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        lastKnownLocation = task.result
+                        val lastKnownLocation = task.result
                         if (lastKnownLocation != null) {
                             map.moveCamera(
                                 CameraUpdateFactory.newLatLngZoom(
@@ -71,40 +125,14 @@ class SelectLocationFragment : BaseFragment() {
                                 )
                             )
                         }
-                    }else {
-                        map?.uiSettings?.isMyLocationButtonEnabled = false
+                        else{
+                            Log.d(TAG, "Current location is null. Using defaults.")
+                        }
                     }
                 }
             }
-
-
-        }catch (e: SecurityException) {
+        }catch (e: SecurityException){
             Log.e("Exception: %s", e.message, e)
-        }
-    }
-
-    private fun enableMyLocation() {
-        if (!::map.isInitialized) return
-        if (ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            )
-            == PackageManager.PERMISSION_GRANTED
-        ) {
-            map.isMyLocationEnabled = true
-            fusedLocationProviderClient =
-                LocationServices.getFusedLocationProviderClient(requireContext())
-            Toast.makeText(requireContext(), "Select a point of interest", Toast.LENGTH_LONG).show()
-        } else {
-            // Permission to access the location is missing. Show rationale and request permission
-            Toast.makeText(requireContext(), "Permission needed to find you", Toast.LENGTH_SHORT)
-                .show()
-            requestPermissions(
-                arrayOf<String>(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                ), LOCATION_PERMISSION_REQUEST_CODE
-            )
         }
     }
 
@@ -113,36 +141,31 @@ class SelectLocationFragment : BaseFragment() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
+        locationPermissionGranted = false
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.size > 0 && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+            if (grantResults.isNotEmpty() && (grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                 enableMyLocation()
+                locationPermissionGranted = true
+            } else {
+                // Permission to access the location is missing. Show rationale and request permission
+                Toast.makeText(
+                    requireContext(),
+                    "Permission needed to find you",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                    requestPermissions(
+                        arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                        ), LOCATION_PERMISSION_REQUEST_CODE
+                    )
+                }
             }
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View? {
-        binding =
-            DataBindingUtil.inflate(inflater, R.layout.fragment_select_location, container, false)
-
-        binding.viewModel = _viewModel
-        binding.lifecycleOwner = this
-
-
-
-        setHasOptionsMenu(true)
-        setDisplayHomeAsUpEnabled(true)
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        val mapFragment =
-            childFragmentManager.findFragmentById(R.id.map_fragment) as SupportMapFragment?
-        mapFragment?.getMapAsync(callback)
-
-    }
 
     private fun setMapOnLongClick(map: GoogleMap) {
         map.setOnMapLongClickListener { latLng ->
