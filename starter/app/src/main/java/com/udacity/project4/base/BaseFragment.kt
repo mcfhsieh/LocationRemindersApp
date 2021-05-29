@@ -28,18 +28,18 @@ abstract class BaseFragment : Fragment() {
     override fun onStart() {
         super.onStart()
 
-//        checkAuthenticationState()
+        checkAuthenticationState()
 
-//        authenticationState.observe(this, Observer { authenticationState ->
-//            when (authenticationState) {
-//                AuthenticationState.AUTHENTICATED -> {
-//                    println("user active")
-//                }
-//                AuthenticationState.UNAUTHENTICATED -> {
-//                    loginUser()
-//                }
-//            }
-//        })
+        authenticationState.observe(this, Observer { authenticationState ->
+            when (authenticationState) {
+                AuthenticationState.AUTHENTICATED -> {
+                    println("user active")
+                }
+                AuthenticationState.UNAUTHENTICATED -> {
+                    loginUser()
+                }
+            }
+        })
 
         _viewModel.showErrorMessage.observe(this, Observer {
             Toast.makeText(activity, it, Toast.LENGTH_LONG).show()
