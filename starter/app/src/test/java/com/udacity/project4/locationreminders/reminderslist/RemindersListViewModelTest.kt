@@ -13,6 +13,7 @@ import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.notNullValue
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -48,6 +49,10 @@ class RemindersListViewModelTest {
             dataSource.saveReminder(reminder)
         }
     }
+    @After
+    fun close(){
+        stopKoin()
+    }
 
     @Test
     fun loadReminders_getsRemindersForDisplay() {
@@ -59,7 +64,6 @@ class RemindersListViewModelTest {
         assertThat(remindersList, `is`(notNullValue()))
         assertThat(viewModel.showLoading.getOrAwaitValue(), `is`(false))
         assertThat(viewModel.showNoData.getOrAwaitValue(), `is`(false))
-        stopKoin()
     }
 
     @Test
@@ -68,7 +72,6 @@ class RemindersListViewModelTest {
         viewModel.loadReminders()
         assertThat(viewModel.showSnackBar.getOrAwaitValue(), `is`("Reminder not found"))
         assertThat(viewModel.showNoData.getOrAwaitValue(), `is`(true))
-        stopKoin()
     }
 
     //TODO: provide testing to the RemindersListViewModel and its live data objects

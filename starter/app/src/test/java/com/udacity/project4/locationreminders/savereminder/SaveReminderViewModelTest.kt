@@ -11,10 +11,12 @@ import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.hamcrest.CoreMatchers.*
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.koin.core.context.stopKoin
 
 @ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
@@ -30,9 +32,14 @@ class SaveReminderViewModelTest {
     var instantTaskExecutorRule = InstantTaskExecutorRule()
     @Before
     fun init(){
-        saveReminderViewModel = SaveReminderViewModel(ApplicationProvider.getApplicationContext(), dataSource)
         dataSource = FakeDataSource()
+        saveReminderViewModel = SaveReminderViewModel(ApplicationProvider.getApplicationContext(), dataSource)
 
+    }
+
+    @After
+    fun close(){
+        stopKoin()
     }
 
     @Test

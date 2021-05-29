@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.google.android.gms.common.api.ApiException
@@ -74,17 +75,12 @@ class SelectLocationFragment : BaseFragment() {
         map = googleMap
         setMapStyle(map)
         enableMyLocation()
-        getDeviceLocation()
         setMapOnLongClick(map)
         setPoiClick(map)
-        val initLatlng = LatLng(32.815581157757485, -96.77036646532642)
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(initLatlng, 15f))
-
     }
 
     private fun enableMyLocation() {
         if (!::map.isInitialized) return
-        locationPermissionGranted = true
         if (ContextCompat.checkSelfPermission(
                 requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -92,19 +88,13 @@ class SelectLocationFragment : BaseFragment() {
             == PackageManager.PERMISSION_GRANTED
         ) {
             map.isMyLocationEnabled = true
-//            Toast.makeText(requireContext(), "Select a point of interest", Toast.LENGTH_LONG).show()
+            locationPermissionGranted = true
+            getDeviceLocation()
         } else {
             // Permission to access the location is missing. Show rationale and request permission
-            Toast.makeText(requireContext(), "Permission needed to find you", Toast.LENGTH_SHORT)
-                .show()
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                requestPermissions(
-                    arrayOf(
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                    ), LOCATION_PERMISSION_REQUEST_CODE
-                )
-            }
+            locationPermissionGranted = false
+            requestPermissions()
+
         }
     }
 
@@ -125,14 +115,44 @@ class SelectLocationFragment : BaseFragment() {
                                 )
                             )
                         }
-                        else{
-                            Log.d(TAG, "Current location is null. Using defaults.")
-                        }
+                    } else {
+                        Toast.makeText(requireContext(), "Location not found", Toast.LENGTH_SHORT)
+                            .show()
                     }
                 }
             }
-        }catch (e: SecurityException){
+        } catch (e: SecurityException) {
             Log.e("Exception: %s", e.message, e)
+        }
+    }
+
+    private fun requestPermissions() {
+
+        if (activity?.let {
+                ActivityCompat.shouldShowRequestPermissionRationale(
+                    it,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                )
+            } == true) {
+
+            _viewModel.showSnackBar.value = "Need permission to find you!"
+            // Provide an additional rationale to the user if the permission was not granted
+            // and the user would benefit from additional context for the use of the permission.
+            // Display a SnackBar with a button to request the missing permission.
+
+        }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            requestPermissions(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                ), LOCATION_PERMISSION_REQUEST_CODE
+            )
+        } else {
+            requestPermissions(
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                LOCATION_PERMISSION_REQUEST_CODE
+            )
         }
     }
 
@@ -148,24 +168,10 @@ class SelectLocationFragment : BaseFragment() {
                 locationPermissionGranted = true
             } else {
                 // Permission to access the location is missing. Show rationale and request permission
-                Toast.makeText(
-                    requireContext(),
-                    "Permission needed to find you",
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                    requestPermissions(
-                        arrayOf(
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                        ), LOCATION_PERMISSION_REQUEST_CODE
-                    )
-                }
+                requestPermissions()
             }
         }
     }
-
 
     private fun setMapOnLongClick(map: GoogleMap) {
         map.setOnMapLongClickListener { latLng ->

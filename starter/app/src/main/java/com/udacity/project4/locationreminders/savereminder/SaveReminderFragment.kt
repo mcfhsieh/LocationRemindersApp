@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -16,12 +17,14 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.common.wrappers.Wrappers.packageManager
 import com.google.android.gms.location.*
 import com.google.android.material.snackbar.Snackbar
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentSaveReminderBinding
+import com.udacity.project4.locationreminders.RemindersActivity
 import com.udacity.project4.locationreminders.geofence.GeofenceBroadcastReceiver
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
@@ -95,6 +98,7 @@ class SaveReminderFragment : BaseFragment() {
         val settingsClient = LocationServices.getSettingsClient(requireActivity())
         val locationSettingsResponseTask =
             settingsClient.checkLocationSettings(builder.build())
+
         locationSettingsResponseTask.addOnFailureListener { exception ->
             if (exception is ResolvableApiException && resolve) {
                 try {
@@ -107,10 +111,6 @@ class SaveReminderFragment : BaseFragment() {
                         0,
                         null
                     )
-//                    exception.startResolutionForResult(
-//                        requireActivity(),
-//                        REQUEST_TURN_DEVICE_LOCATION_ON
-//                    )
                 } catch (sendEx: IntentSender.SendIntentException) {
                     Log.d(TAG, "Error getting location settings resolution: " + sendEx.message)
                 }
@@ -119,7 +119,7 @@ class SaveReminderFragment : BaseFragment() {
                     binding.saveReminderLayout,
                     R.string.location_required_error, Snackbar.LENGTH_INDEFINITE
                 ).setAction(android.R.string.ok) {
-                    checkLocationForGeofence()
+                    openLocationSettings()
                 }.show()
             }
         }
@@ -129,6 +129,20 @@ class SaveReminderFragment : BaseFragment() {
             } else {
                 println("locationSettigsResponseTask failed")
             }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_TURN_DEVICE_LOCATION_ON) {
+            checkLocationForGeofence(false)
+        }
+    }
+
+    private fun openLocationSettings() {
+        val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+        if(activity?.let { intent.resolveActivity(it.packageManager) } != null){
+            startActivity(intent)
         }
     }
 
@@ -147,12 +161,6 @@ class SaveReminderFragment : BaseFragment() {
             .addGeofence(geoFence)
             .build()
 
-//        if (ContextCompat.checkSelfPermission(
-//                requireContext(),
-//                Manifest.permission.ACCESS_FINE_LOCATION
-//            )
-//            == PackageManager.PERMISSION_GRANTED
-//        )
         if (foregroundAndBackgroundLocationPermissionApproved()) {
             geoFencingClient.addGeofences(request, geofencePendingIntent)?.run {
                 addOnSuccessListener {
@@ -225,12 +233,7 @@ class SaveReminderFragment : BaseFragment() {
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-//        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_TURN_DEVICE_LOCATION_ON) {
-            checkLocationForGeofence(false)
-        }
-    }
+
 
     override fun onDestroy() {
         super.onDestroy()

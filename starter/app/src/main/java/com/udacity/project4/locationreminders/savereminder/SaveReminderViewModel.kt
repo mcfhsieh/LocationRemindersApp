@@ -83,4 +83,8 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
         }
         return true
     }
+
+    fun showLocationPermissionRationale(){
+        showSnackBar.value = "Location permission needed to find you"
+    }
 }
